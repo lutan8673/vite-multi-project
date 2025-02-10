@@ -17,6 +17,7 @@ import Icons from "unplugin-icons/vite";
 import IconsResolver from "unplugin-icons/resolver";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import chalk from "chalk"; // console高亮
+import zipPack from "vite-plugin-zip-pack"
 
 // 获取当前文件的目录名
 const __filename = fileURLToPath(import.meta.url);
@@ -66,11 +67,17 @@ export default (config) =>
         autoInstall: true,
       }),
       // gzip格式
-      compression({
-        threshold: 1024 * 500, // 体积大于 threshold 才会被压缩,单位 b
-        ext: ".gz", // 压缩文件格式
-        deleteOriginFile: false, // 是否删除源文件
-      }),
+      // compression({
+      //   threshold: 1024 * 500, // 体积大于 threshold 才会被压缩,单位 b
+      //   ext: ".gz", // 压缩文件格式
+      //   deleteOriginFile: false, // 是否删除源文件
+      // }),
+      zipPack({
+        inDir: `dist/${config.page}`,  // 输入的文件夹，就是要打包的文件夹
+        outDir: 'package', // 打包好的 zip 文件放到哪个文件夹下
+        outFileName: `${config.page}.zip`, // 打包好的文件名，自行定义，这里我定义了一个 timeStringNow 变量，放置了此时此刻的时间 2024-01-06 这样的
+        pathPrefix: `lutan.com.cn/${config.page}`
+      })
     ],
     resolve: {
       alias: {
@@ -121,6 +128,7 @@ export default (config) =>
             }
           },
         },
+        // external: ['vue', 'vue-router'], // 排除 vue 和 vue-router
       },
     },
   });

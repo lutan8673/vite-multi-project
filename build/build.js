@@ -28,7 +28,7 @@ const getEnterPage = () => {
     page: npm_config_page,
     input: path.resolve(
       __dirname,
-      `../src/projects/${npm_config_page}/main.js`
+      `../src/projects/${npm_config_page}/index.html`
     ),
   };
 };
@@ -63,18 +63,12 @@ if (npm_config_page) {
 
 console.log(buildList);
 
-if (!buildList.length) {
-  errorLog(
-    "⚠️ 警告 -- 请在命令行后以 `--page=页面名称` 格式指定正确的页面名称！"
-  );
-}
-
 const buildProject = async () => {
   try {
     const item = buildList.shift();
     const defineConfig = defineConfigHook(item);
     // 调用Vite的build API
-    const res = await build(defineConfig);
+    await build(defineConfig);
     console.log(`🚀🚀🚀 ${chalk.green.bold(`${item.page} 构建成功!`)}`);
     if (buildList.length) {
       buildProject();
@@ -84,4 +78,10 @@ const buildProject = async () => {
   }
 };
 
-buildProject();
+if (!buildList.length) {
+  errorLog(
+    "⚠️ 警告 -- 请在命令行后以 `--page=页面名称` 格式指定正确的页面名称！"
+  );
+} else{
+  buildProject();
+}
