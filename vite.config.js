@@ -23,6 +23,9 @@ import zipPack from "vite-plugin-zip-pack"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// 获取npm run dev后缀 配置的环境变量
+const npm_config_page = process.env.npm_config_page || "";
+
 // 打包提示
 const buildEndFn = (name) => {
   console.log(
@@ -30,7 +33,7 @@ const buildEndFn = (name) => {
   );
 };
 
-export default (config) =>
+export const defineConfigHook = (config) =>
   defineConfig({
     root: path.resolve(__dirname, `./src/projects/${config.page}`),
     base: "./",
@@ -132,3 +135,11 @@ export default (config) =>
       },
     },
   });
+
+export default defineConfigHook({
+  page: npm_config_page,
+  input: path.resolve(
+    __dirname,
+    `./src/projects/${npm_config_page}/index.html`
+  ),
+});

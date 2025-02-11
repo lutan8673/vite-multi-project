@@ -2,7 +2,7 @@ import { build } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import chalk from "chalk"; // console高亮
-import defineConfigHook from "../vite.config.js";
+import { defineConfigHook } from "../vite.config.js";
 import project from "../scripts/multiPages.json" assert { type: "json" }; // 引入多页面配置文件
 
 // 获取当前文件的目录名

@@ -61,12 +61,12 @@ process.stdin.on('data', async (chunk) => {
     // 通过writeFile改变数据内容
     fs.writeFile(
       path.resolve('./scripts', 'multiPages.json'),
-      JSON.stringify(datas),
+      JSON.stringify(datas, null, '\t'),
       'utf-8',
       (err) => {
         if (err) throw err
         // 在project中建立新的目录
-        fs.mkdirSync(targetPath)
+        fs.mkdirSync(targetPath, { recursive: true })
         const sourcePath = resolve(
           isTs ? './scripts/template-ts' : './scripts/template'
         )
