@@ -10,55 +10,87 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 获取npm run dev后缀 配置的环境变量
-const npm_config_page = process.env.npm_config_page || "";
+const npm_config_module = process.env.npm_config_module || "";
+const npm_config_name = process.env.npm_config_name || "";
 // 命令行报错提示
 const errorLog = (error) => console.log(chalk.red(`${error}`));
 
 //获取指定的单页面入口
 const getEnterPage = () => {
-  const filterArr = project.filter(
-    (item) => item.chunk.toLowerCase() == npm_config_page.toLowerCase()
+  const findBid = project.find(
+    (item) => item.bid.toLowerCase() == npm_config_name.toLowerCase()
   );
-  if (!filterArr.length) {
+  if (!findBid) {
     errorLog("⚠️ 警告 -- 不存在此页面，请检查页面名称！");
     return;
   }
 
   return {
-    page: npm_config_page,
+    module: findBid.module,
+    chunk: findBid.chunk,
+    bid: findBid.bid,
+    bidDir: findBid.bidDir,
     input: path.resolve(
       __dirname,
-      `../src/projects/${npm_config_page}/index.html`
-    ),
+      `../src/projects/${findBid.bidDir}/index.html`
+    )
   };
 };
 
-//多页面入口
-const getEnterPages = (p) => {
-  const pages = {};
-  p.forEach((ele) => {
-    const htmlUrl = path.resolve(
-      __dirname,
-      `src/projects/${ele.chunk}/index.html`
-    );
-    pages[ele.chunk] = htmlUrl;
+//模块入口
+const getModuleEnterPage = () => {
+  const findModuleList = project.filter(
+    (item) => item.module == npm_config_module
+  ).map((item) => {
+    return {
+      module: item.module,
+      chunk: item.chunk,
+      bid: item.bid,
+      bidDir: item.bidDir,
+      input: path.resolve(
+        __dirname,
+        `../src/projects/${item.bidDir}/index.html`
+      ),
+    };
   });
-  return pages;
+  if (findModuleList.length == 0) {
+    errorLog("⚠️ 警告 -- 不存在此模块，请检查模块名称！");
+    return [];
+  }
+
+  return findModuleList;
+}
+
+//多页面入口
+const getAllEnterPages = (p) => {
+  const findList = project.map((item) => {
+    return {
+      module: item.module,
+      chunk: item.chunk,
+      bid: item.bid,
+      bidDir: item.bidDir,
+      input: path.resolve(
+        __dirname,
+        `../src/projects/${item.bidDir}/index.html`
+      ),
+    };
+  })
+
+  return findList;
 };
 
 const buildList = [];
-if (npm_config_page) {
+if (npm_config_name) {
   const enterPage = getEnterPage();
   if (enterPage) {
     buildList.push(enterPage);
   }
+} else if(npm_config_module) {
+  const moduleList = getModuleEnterPage();
+  buildList.push(...moduleList);
 } else {
-  Object.keys(getEnterPages(project)).forEach((key) => {
-    buildList.push({
-      page: key,
-      input: path.resolve(__dirname, `../src/projects/${key}/index.html`),
-    });
-  });
+  const allPages = getAllEnterPages();
+  buildList.push(...allPages);
 }
 
 console.log(buildList);
@@ -69,7 +101,7 @@ const buildProject = async () => {
     const defineConfig = defineConfigHook(item);
     // 调用Vite的build API
     await build(defineConfig);
-    console.log(`🚀🚀🚀 ${chalk.green.bold(`${item.page} 构建成功!`)}`);
+    console.log(`🚀🚀🚀 ${chalk.green.bold(`${item.bid} 构建成功!`)}`);
     if (buildList.length) {
       buildProject();
     }

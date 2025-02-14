@@ -6,7 +6,7 @@ const resolve = (__dirname, ...file) => path.resolve(__dirname, ...file)
 const log = (message) => console.log(chalk.green(`${message}`))
 const successLog = (message) => console.log(chalk.blue(`${message}`))
 const errorLog = (error) => console.log(chalk.red(`${error}`))
-log('请输入要生成的"页面名称:页面描述"、会生成在 /src/projects 目录下')
+log('请输入要生成的"页面路径名称:页面描述"、会生成在 /src/projects 目录下')
 process.stdin.on('data', async (chunk) => {
   // 获取输入的信息
   const content = String(chunk).trim().toString()
@@ -37,21 +37,29 @@ process.stdin.on('data', async (chunk) => {
     (err, data) => {
       //获取老数据
       let datas = JSON.parse(data)
-      //和老数据去重
-      let index = datas.findIndex((ele) => {
-        return ele.chunk == inputName
-      })
-      if (index == -1) {
-        //写入新页面的信息
-        let obj = {
-          chunk: inputName,
-          chunkName: inputDesc
-        }
-        datas.push(obj)
-        setFile(datas)
-      }else{
-        errorLog('已存在该文件名称，请重新输入')
+      const dirList = inputName.split('/')
+      if (dirList.length < 2) {
+        errorLog('页面路径输入错误，请重新输入')
+        return
       }
+      const [chunk, module, bid = module] = dirList
+      //bid必须唯一
+      const findBid = datas.find((item) => {
+        return item.bid == bid
+      })
+      if (findBid) {
+        errorLog('已存在该路径的文件名称，请重新输入')
+        return
+      }
+      const obj = {
+        module,
+        chunk,
+        bid,
+        bidDir: inputName,
+        bidName: inputDesc
+      }
+      datas.push(obj)
+      setFile(datas)
     }
   )
   /**

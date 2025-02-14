@@ -18,13 +18,38 @@ import IconsResolver from "unplugin-icons/resolver";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import chalk from "chalk"; // console高亮
 import zipPack from "vite-plugin-zip-pack"
+import project from "./scripts/multiPages.json" assert { type: "json" }; // 引入多页面配置文件
 
 // 获取当前文件的目录名
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // 获取npm run dev后缀 配置的环境变量
-const npm_config_page = process.env.npm_config_page || "";
+const npm_config_module = process.env.npm_config_module || "";
+const npm_config_name = process.env.npm_config_name || "";
+
+// 命令行报错提示
+const errorLog = (error) => console.log(chalk.red(`${error}`));
+
+//获取指定的单页面入口
+const getEnterPage = () => {
+  const findBid = project.find((item) => item.bid.toLowerCase() == npm_config_name.toLowerCase());
+  if(!findBid){
+    errorLog("⚠️ 警告 -- 不存在此页面，请检查页面名称！");
+    return;
+  }
+
+  return {
+    module: findBid.module,
+    chunk: findBid.chunk,
+    bid: findBid.bid,
+    bidDir: findBid.bidDir,
+    input: path.resolve(
+      __dirname,
+      `src/projects/${findBid.bidDir}/index.html`
+    )
+  };
+};
 
 // 打包提示
 const buildEndFn = (name) => {
@@ -35,7 +60,7 @@ const buildEndFn = (name) => {
 
 export const defineConfigHook = (config) =>
   defineConfig({
-    root: path.resolve(__dirname, `./src/projects/${config.page}`),
+    root: path.resolve(__dirname, `./src/projects/${config.bidDir}`),
     base: "./",
     envDir: path.resolve(__dirname), //用于加载 .env 文件的目录。可以是一个绝对路径，也可以是相对于项目根的路径。
     plugins: [
@@ -76,12 +101,20 @@ export const defineConfigHook = (config) =>
       //   deleteOriginFile: false, // 是否删除源文件
       // }),
       zipPack({
-        inDir: `dist/${config.page}`,  // 输入的文件夹，就是要打包的文件夹
+        inDir: `dist/${config.bidDir}`,  // 输入的文件夹，就是要打包的文件夹
         outDir: 'package', // 打包好的 zip 文件放到哪个文件夹下
-        outFileName: `${config.page}.zip`, // 打包好的文件名，自行定义，这里我定义了一个 timeStringNow 变量，放置了此时此刻的时间 2024-01-06 这样的
-        pathPrefix: `lutan.com.cn/${config.page}`
+        outFileName: `${config.bid}.zip`, // 打包好的文件名，自行定义，这里我定义了一个 timeStringNow 变量，放置了此时此刻的时间 2024-01-06 这样的
+        pathPrefix: `lutan.com.cn/${config.bid}`
       })
     ],
+    // 设置scss的api类型为modern-compiler
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler'
+        }
+      }
+    },
     resolve: {
       alias: {
         "@": path.join(__dirname, "./src"),
@@ -96,7 +129,7 @@ export const defineConfigHook = (config) =>
       https: false, // 是否开启 https
     },
     build: {
-      outDir: path.resolve(__dirname, `dist/${config.page}`), // 指定输出路径
+      outDir: path.resolve(__dirname, `dist/${config.bidDir}`), // 指定输出路径
       assetsInlineLimit: 4096, //小于此阈值的导入或引用资源将内联为 base64 编码，以避免额外的 http 请求
       emptyOutDir: true, //Vite 会在构建时清空该目录
       terserOptions: {
@@ -112,9 +145,9 @@ export const defineConfigHook = (config) =>
       rollupOptions: {
         //自定义底层的 Rollup 打包配置
         input: {
-          [config.page]: config.input, // 配置页面入口
+          [config.bid]: config.input, // 配置页面入口
         },
-        buildEnd: buildEndFn(config.page),
+        buildEnd: buildEndFn(config.bid),
         output: {
           assetFileNames: "[ext]/[name]-[hash].[ext]", //静态文件输出的文件夹名称
           chunkFileNames: "js/[name]-[hash].js", //chunk包输出的文件夹名称
@@ -135,11 +168,4 @@ export const defineConfigHook = (config) =>
       },
     },
   });
-
-export default defineConfigHook({
-  page: npm_config_page,
-  input: path.resolve(
-    __dirname,
-    `./src/projects/${npm_config_page}/index.html`
-  ),
-});
+// export default defineConfigHook(getEnterPage());

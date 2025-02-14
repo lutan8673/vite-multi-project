@@ -36,6 +36,5 @@
     "src/vite-env.d.ts",
     "types/*.d.ts"
   ],
-  "exclude": ["vite.config.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["vite.config.ts"]
 }
