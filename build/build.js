@@ -85,7 +85,7 @@ if (npm_config_name) {
   if (enterPage) {
     buildList.push(enterPage);
   }
-} else if(npm_config_module) {
+} else if (npm_config_module) {
   const moduleList = getModuleEnterPage();
   buildList.push(...moduleList);
 } else {
@@ -114,6 +114,6 @@ if (!buildList.length) {
   errorLog(
     "⚠️ 警告 -- 请在命令行后以 `--page=页面名称` 格式指定正确的页面名称！"
   );
-} else{
+} else {
   buildProject();
 }

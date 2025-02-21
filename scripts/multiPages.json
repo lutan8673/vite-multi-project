@@ -1,23 +1,9 @@
 [
 	{
-		"chunk": "loan",
-		"bidName": "商贷",
-		"bid": "cloudLoanView",
-		"module": "cloudLoan",
-		"bidDir": "loan/cloudLoan/cloudLoanView"
-	},
-	{
-		"chunk": "loan",
-		"bidName": "房贷",
-		"bid": "houseLoan",
 		"module": "houseLoan",
-		"bidDir": "loan/houseLoan"
-	},
-	{
 		"chunk": "loan",
-		"bidName": "贷款列表",
-		"bid": "cloudLoanList",
-		"module": "cloudLoan",
-		"bidDir": "loan/cloudLoan/cloudLoanList"
+		"bid": "houseLoan",
+		"bidDir": "loan/houseLoan",
+		"bidName": "房贷"
 	}
 ]
