@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 import { build } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,16 +13,22 @@ const module = process.env.npm_config_module || "";
 const name = process.env.npm_config_name || "";
 // 命令行报错提示
 const errorLog = (error) => console.log(chalk.red(`${error}`));
+// 打包提示
+const buildEndFn = (name) => {
+  console.log(`🚀🚀🚀 ${chalk.green.bold(`${name} 构建成功!`)}`);
+};
 
 // 递归获取指定目录及其所有子目录下的所有文件名称
-const getFilesInDirectory = (dirPath, module = '', name = '') => {
+const getFilesInDirectory = (dirPath, module = "", name = "") => {
   let results = [];
   let list = fs.readdirSync(dirPath);
   if (name) {
     list = list.filter((file) => file.includes(name));
   }
   if (!module) {
-    list = list.filter((file) => !['index.prod.js', 'index.dev.js'].includes(file));
+    list = list.filter(
+      (file) => !["index.prod.js", "index.dev.js"].includes(file)
+    );
   }
 
   list.forEach((file) => {
@@ -36,7 +42,7 @@ const getFilesInDirectory = (dirPath, module = '', name = '') => {
     } else {
       results.push({
         module: module,
-        name: file.replace('.js', '')
+        name: file.replace(".js", ""),
       });
     }
   });
@@ -45,19 +51,20 @@ const getFilesInDirectory = (dirPath, module = '', name = '') => {
 };
 
 const buildList = [];
-let directoryPath = '', files = [];
+let directoryPath = "",
+  files = [];
 if (module) {
   // 目录路径
   directoryPath = path.resolve(__dirname, `../src/router/${module}`);
 } else {
   // 目录路径
-  directoryPath = path.resolve(__dirname, '../src/router');
+  directoryPath = path.resolve(__dirname, "../src/router");
 }
 // 获取文件名称列表
 files = getFilesInDirectory(directoryPath, module, name);
 
 buildList.push(...files);
-console.log('文件列表:', buildList);
+console.log("文件列表:", buildList);
 
 const runBuild = async function () {
   try {
@@ -67,24 +74,21 @@ const runBuild = async function () {
         module: item.module,
         name: item.name,
       },
-      root: './',
+      root: "./",
       build: {
         outDir: `dist/${item.name}`,
         rollupOptions: {
-          input: 'index.html',
+          buildEnd: buildEndFn(item.name),
         },
       },
     });
-    console.log(`🚀🚀🚀 ${chalk.green.bold(`${item.name} 构建成功!`)}`);
     if (buildList.length) {
       runBuild();
     }
   } catch (err) {
     errorLog(`⚠️ Build failed: ${err}！`);
-  } finally {
-    console.log("🎉🎉🎉 构建完成！");
   }
-}
+};
 
 if (!buildList.length) {
   errorLog(
