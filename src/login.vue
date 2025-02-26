@@ -26,22 +26,32 @@
       </div>
       <button type="submit" class="login-button">登录</button>
     </form>
+    <button class="login-button" @click="clickHandle">跳转</button>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const username = ref("");
 const password = ref("");
 
+const clickHandle = () => {
+  router.push('/houseLoan');
+}
+
 const handleLogin = () => {
-  if (username.value && password.value) {
-    alert(`登录成功！\n用户名: ${username.value}`);
-    // 这里可以添加登录逻辑，比如发送请求到服务器
-  } else {
-    alert("请输入用户名和密码！");
-  }
+  router.push('/houseLoan');
+  // router.push('/houseLoan');
+  // if (username.value && password.value) {
+  //   alert(`登录成功！\n用户名: ${username.value}`);
+  //   // 这里可以添加登录逻辑，比如发送请求到服务器
+  // } else {
+  //   alert("请输入用户名和密码！");
+  // }
 };
 </script>
 
