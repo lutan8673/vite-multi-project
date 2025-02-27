@@ -13,10 +13,10 @@ const __dirname = path.dirname(__filename);
 const module = process.env.npm_config_module || "";
 const name = process.env.npm_config_name || "";
 // 命令行报错提示
-const errorLog = (error) => console.log(chalk.red(`${error}`));
+const errorLog = (error) => console.log(`⚡⚡⚡${chalk.red(`${error}`)}`);
 // 打包提示
 const buildEndFn = (name) => {
-  console.log(`🚀🚀🚀 ${chalk.green.bold(`${name} 构建成功!`)}`);
+  console.log(`🚀🚀🚀 ${chalk.green.bold(`${name} 开始构建!`)}`);
 };
 
 // 递归获取指定目录及其所有子目录下的所有文件名称
@@ -76,6 +76,18 @@ const runBuild = async function () {
       },
       root: "./",
       plugins: [
+        {
+          renderError: (err) => {
+            if (err) {
+              errorLog(err)
+              // 删除已生成的文件夹
+              const errDir = path.resolve(__dirname, `../dist/${item.name}`);
+              if (fs.existsSync(errDir)) {
+                fs.rmSync(errDir, { recursive: true });
+              }
+            }
+          }
+        },
         zipPack({
           inDir: `dist/${item.name}`, // 要打包的文件夹
           outDir: "package", // 打包好输出到该目录下
@@ -90,11 +102,12 @@ const runBuild = async function () {
         },
       },
     });
+  } catch (err) {
+    errorLog(`⚠️Build failed: ${err}！`);
+  } finally {
     if (buildList.length) {
       runBuild();
     }
-  } catch (err) {
-    errorLog(`⚠️ Build failed: ${err}！`);
   }
 };
 
